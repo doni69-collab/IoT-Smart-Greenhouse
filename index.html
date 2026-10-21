@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Умная теплица — IoT-панель</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#dashboard"><span class="brand-icon">🌱</span><span><b>Умная теплица</b><small>IoT · Мониторинг</small></span></a>
+    <div class="side-label">ОСНОВНОЕ</div>
+    <nav id="navigation">
+      <button class="nav-item active" data-page="dashboard"><span>▦</span> Панель управления</button>
+      <button class="nav-item" data-page="zones"><span>♧</span> Зоны теплицы</button>
+      <button class="nav-item" data-page="sensors"><span>⌁</span> Датчики</button>
+      <button class="nav-item" data-page="control"><span>⏻</span> Управление</button> 
+      <button class="nav-item" data-page="alerts"><span>⚑</span> Уведомления <em id="alertCount">0</em></button>
+      <button class="nav-item" data-page="analytics"><span>⌁</span> Аналитика</button>
+      <button class="nav-item" data-page="settings"><span>⚙</span> Настройки</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="online-dot"></div><div><b>Симулятор активен</b><small>Учебные данные</small></div></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">МОНИТОРИНГ · IoT</div><h1 id="pageTitle">Панель управления</h1></div>
+      <div class="top-actions"><span class="live"><i></i> Система работает</span><button class="icon-button" id="themeButton" title="Сменить тему">◐</button><div class="avatar">ИТ</div></div>
+    </header>
+
+    <section class="page active" id="page-dashboard">
+      <div class="welcome"><div><div class="eyebrow light">СРЕДА УПРАВЛЕНИЯ</div><h2>Состояние вашей теплицы</h2><p>Данные датчиков обновляются автоматически каждые 5 секунд.</p></div><div class="welcome-plant">🌿</div></div>
+      <div class="kpi-grid">
+        <article class="kpi"><div class="kpi-top"><span>Температура</span><span class="kpi-icon orange">🌡</span></div><div class="kpi-value" id="kpiTemp">24,8 <small>°C</small></div><div class="kpi-foot"><span class="status-pill good">● В норме</span><span>Воздух</span></div></article>
+        <article class="kpi"><div class="kpi-top"><span>Влажность воздуха</span><span class="kpi-icon blue">💧</span></div><div class="kpi-value" id="kpiHumidity">67 <small>%</small></div><div class="kpi-foot"><span class="status-pill good">● В норме</span><span>Относительная</span></div></article>
+        <article class="kpi"><div class="kpi-top"><span>Влажность почвы</span><span class="kpi-icon green">♧</span></div><div class="kpi-value" id="kpiSoil">42 <small>%</small></div><div class="kpi-foot"><span class="status-pill good" id="soilStatus">● В норме</span><span>Среднее значение</span></div></article>
+        <article class="kpi"><div class="kpi-top"><span>Запас воды</span><span class="kpi-icon violet">◒</span></div><div class="kpi-value" id="kpiWater">72 <small>%</small></div><div class="mini-progress"><span id="waterBar"></span></div><div class="kpi-foot"><span>Резервуар</span><span id="waterCaption">Достаточно</span></div></article>
+      </div>
+      <div class="content-grid">
+        <article class="panel chart-panel"><div class="panel-heading"><div><h3>Изменение температуры</h3><p>История показаний за последнее время</p></div><span class="chart-legend"><i></i> Температура</span></div><div class="chart-wrap"><canvas id="temperatureChart"></canvas></div></article>
+        <article class="panel"><div class="panel-heading"><div><h3>Зоны теплицы</h3><p>Состояние участков выращивания</p></div><button class="text-button" data-go="zones">Все зоны →</button></div><div id="zoneSummary" class="zone-list"></div></article>
+      </div>
+      <div class="content-grid lower-grid">
+        <article class="panel"><div class="panel-heading"><div><h3>Последние уведомления</h3><p>События, требующие внимания</p></div><button class="text-button" data-go="alerts">Все →</button></div><div id="recentAlerts" class="alert-list"></div></article>
+        <article class="panel"><div class="panel-heading"><div><h3>Устройства</h3><p>Состояние исполнительных механизмов</p></div><button class="text-button" data-go="control">Управлять →</button></div><div id="deviceSummary" class="device-list"></div></article>
+      </div>
+    </section>
+
+    <section class="page" id="page-zones">
+      <div class="section-intro"><h2>Зоны выращивания</h2><p>Сравнивайте условия в разных частях теплицы.</p></div>
+      <div class="zone-cards" id="zoneCards"></div>
+    </section>
+
+    <section class="page" id="page-sensors">
+      <div class="section-intro"><h2>Датчики</h2><p>Текущие показания учебного симулятора. Реальные датчики не подключены.</p></div>
+      <div class="toolbar"><input id="sensorSearch" placeholder="Поиск по датчику или зоне…"><select id="sensorFilter"><option value="all">Все статусы</option><option value="online">В сети</option><option value="offline">Не в сети</option></select></div>
+      <div class="panel table-panel"><table><thead><tr><th>Датчик</th><th>Зона</th><th>Показание</th><th>Статус</th><th>Обновление</th></tr></thead><tbody id="sensorRows"></tbody></table></div>
+    </section>
+
+    <section class="page" id="page-control">
+      <div class="section-intro"><h2>Управление устройствами</h2><p>Выберите автоматический или ручной режим управления.</p></div>
+      <div class="mode-card panel"><div><span class="eyebrow">РЕЖИМ РАБОТЫ</span><h3 id="modeHeading">Автоматический режим</h3><p id="modeDescription">Система управляет устройствами по заданным порогам.</p></div><div class="mode-switch"><button class="mode-option active" data-mode="auto">Авто</button><button class="mode-option" data-mode="manual">Вручную</button></div></div>
+      <div id="manualNotice" class="notice hidden">Переключите систему в режим «Вручную», чтобы самостоятельно включать устройства.</div>
+      <div class="device-grid" id="deviceControls"></div>
+      <div class="panel"><div class="panel-heading"><div><h3>Журнал действий</h3><p>Автоматические и ручные команды</p></div><button class="text-button" id="clearEvents">Очистить журнал</button></div><div id="eventLog" class="event-list"></div></div>
+    </section>
+
+    <section class="page" id="page-alerts">
+      <div class="section-intro"><h2>Уведомления</h2><p>События, созданные на основе текущих показаний датчиков.</p></div>
+      <div class="toolbar"><select id="alertFilter"><option value="all">Все уведомления</option><option value="critical">Критические</option><option value="warning">Предупреждения</option></select><button class="secondary-button" id="clearAlerts">Очистить список</button></div>
+      <div class="panel"><div id="allAlerts" class="alert-list spacious"></div></div>
+    </section>
+
+    <section class="page" id="page-analytics">
+      <div class="section-intro"><h2>Аналитика и рекомендации</h2><p>Локальный анализ учебных данных без внешнего AI-сервиса.</p></div>
+      <div class="analytics-kpis"><article class="panel score-panel"><span class="eyebrow">ОБЩИЙ РИСК</span><div class="score" id="riskScore">18<span>/100</span></div><div class="risk-track"><span id="riskBar"></span></div><p id="riskLabel">Низкий риск</p></article><article class="panel"><span class="eyebrow">ДАТЧИКИ В СЕТИ</span><div class="big-number">18 <small>/ 18</small></div><p class="muted">Все учебные датчики доступны</p></article><article class="panel"><span class="eyebrow">АКТИВНЫЕ УВЕДОМЛЕНИЯ</span><div class="big-number" id="analyticsAlerts">0</div><p class="muted">Требуют проверки</p></article></div>
+      <div class="content-grid"><article class="panel chart-panel"><div class="panel-heading"><div><h3>Влажность по зонам</h3><p>Сравнение текущих значений</p></div></div><div class="chart-wrap"><canvas id="soilChart"></canvas></div></article><article class="panel"><div class="panel-heading"><div><h3>Рекомендации системы</h3><p>Что стоит проверить</p></div></div><div id="recommendations" class="recommendations"></div></article></div>
+    </section>
+
+    <section class="page" id="page-settings">
+      <div class="section-intro"><h2>Настройки системы</h2><p>Изменяйте учебные пороговые значения для автоматического управления.</p></div>
+      <div class="panel settings-panel"><h3>Пороговые значения</h3><p class="muted">Эти значения демонстрационные и зависят от культуры и условий выращивания.</p><form id="settingsForm" class="settings-grid">
+        <label>Минимальная температура, °C<input type="number" id="tempMin" value="20" min="0" max="50" step="1"></label>
+        <label>Максимальная температура, °C<input type="number" id="tempMax" value="28" min="0" max="60" step="1"></label>
+        <label>Минимальная влажность почвы, %<input type="number" id="soilMin" value="35" min="0" max="100" step="1"></label>
+        <label>Критический уровень воды, %<input type="number" id="waterMin" value="15" min="0" max="100" step="1"></label>
+        <label>Минимальная освещённость, лк<input type="number" id="lightMin" value="12000" min="0" max="100000" step="500"></label>
+        <div class="form-actions"><button class="primary-button" type="submit">Сохранить настройки</button><button class="secondary-button" type="button" id="resetData">Сбросить данные</button></div>
+      </form><div id="settingsMessage" class="form-message"></div></div>
+      <div class="panel"><h3>О проекте</h3><p>«Умная теплица» — учебный прототип IoT-платформы. Значения генерируются программно, а команды управляют только интерфейсной моделью, не реальным оборудованием.</p></div>
+    </section>
+
+    <footer>Умная теплица · Учебный IoT-проект <span id="lastUpdated">Обновлено только что</span></footer>
+  </main>
+</div>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
